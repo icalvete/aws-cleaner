@@ -7,5 +7,11 @@
   :queue: 'https://sqs.eu-west-1.amazonaws.com/505986258632/instances_terminaded'
 :sensu:
   :url: 'http://localhost:4567'
+:fake_instances:
+  - 'i-02b4811e4833b011d'
+  - 'i-051da8d51881d37a5'
+  - 'i-096ab017fdc705637'
+  - 'i-0a447495d3e76c9b2'
+  - 'i-0d9f627db3c36ea80'
 :log:
-  :file: '/tmp/aws_cleaner.log'
+  :file: '/path/to/log/aws_cleaner.log'
