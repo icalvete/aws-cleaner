@@ -23,8 +23,6 @@ An astute reader might notice that this wont work for new nodes that come up as 
 
 ### Installation
 
-1. `gem install aws-cleaner`
-
 ### Usage
 
 ```
@@ -46,6 +44,18 @@ The app is started by running aws_config.rb and it will run until
 terminated. A production install would start it with upstart or
 similar.
 
+Clean fake instance as soon as they apears in sensu.
+
+```bash
+./fake_instances_cleaner.rb &
+```
+
+Clean isntances as soon as they are terminaced by EC2
+
+```bash
+./aws_cleaner.rb &
+```
+
 ### Logging
 
 By default aws-cleaner will log to STDOUT. If you wish to log to a specific file
@@ -57,7 +67,18 @@ You will want the following config:
 ```
 :sensu:
   :url: 'http://sensu.example.com:4567'
-  :enable: true
+```
+
+### Fake instances
+
+You will want the following config:
+```
+:fake_instances:
+  - 'i-02b4811e4833b011d'
+  - 'i-051da8d51881d37a5'
+  - 'i-096ab017fdc705637'
+  - 'i-0a447495d3e76c9b2'
+  - 'i-0d9f627db3c36ea80'
 ```
 
 ### Limitations
