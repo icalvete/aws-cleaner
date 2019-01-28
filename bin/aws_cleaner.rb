@@ -13,11 +13,8 @@ begin
   require 'json'
   require 'yaml'
   require 'aws-sdk-core'
-  require 'chef-api'
-  require 'hipchat'
   require 'rest-client'
   require 'trollop'
-  require 'slack/poster'
   require 'logger'
 rescue LoadError => e
   raise "Missing gems: #{e}"
@@ -63,47 +60,23 @@ def logger(config)
   logger
 end
 
-def webhook(id, instance_id)
-  if @config[:webhooks]
-    @config[:webhooks].each do |hook, hook_config|
-      if AwsCleaner::Webhooks.fire_webhook(hook_config, @config, instance_id)
-        @logger.info("Successfully ran webhook #{hook}")
-      else
-        @logger.info("Failed to run webhook #{hook}")
-      end
-    end
-    AwsCleaner.new.delete_message(id, @config)
-  end
-end
-
-def chef(id, instance_id, chef_node)
-  if chef_node
-    if AwsCleaner::Chef.remove_from_chef(chef_node, @chef_client, @config)
-      @logger.info("Removed #{chef_node} from Chef")
-      AwsCleaner.new.delete_message(id, @config)
-    end
-  else
-    @logger.info("Instance #{instance_id} does not exist in Chef, deleting message")
-    AwsCleaner.new.delete_message(id, @config)
-  end
-end
-
-def sensu(id, instance_id, chef_node)
-  return unless @config[:sensu][:enable]
-  if AwsCleaner::Sensu.in_sensu?(chef_node, @config)
-    if AwsCleaner::Sensu.remove_from_sensu(chef_node, @config)
-      @logger.info("Removed #{chef_node} from Sensu")
+def sensu(id, node_name)
+  if AwsCleaner::Sensu.in_sensu?(node_name, @config)
+    if AwsCleaner::Sensu.remove_from_sensu(node_name, @config)
+      @logger.info("Removed #{node_name} from Sensu")
     else
-      @logger.info("Instance #{instance_id} does not exist in Sensu, deleting message")
+      @logger.info("Instance #{node_name} does not exist in Sensu, deleting message")
     end
-    AwsCleaner.new.delete_message(id, @config)
   end
+  @logger.info("Instance #{node_name} does not exist in Sensu, deleting message")
+  AwsCleaner.new.delete_message(id, @config, @sqs_client)
 end
 
 def closelog(message)
   @logger.debug(message) unless message.nil?
   @logger.close
 end
+
 
 # get options
 opts = Trollop.options do
@@ -113,14 +86,7 @@ end
 @config = config(opts[:config])
 @logger = logger(@config)
 @sqs_client = AwsCleaner::SQS.client(@config)
-@chef_client = AwsCleaner::Chef.client(@config)
-
-# to provide backwards compatibility as this key did not exist previously
-@config[:sensu][:enable] = if @config[:sensu][:enable].nil?
-                             true
-                           else
-                             @config[:sensu][:enable]
-                           end
+@ec2_client = AwsCleaner::EC2.client(@config)
 
 # main loop
 loop do
@@ -140,20 +106,19 @@ loop do
       id = message.receipt_handle
 
       unless body
-        AwsCleaner.new.delete_message(id, @config)
+        AwsCleaner.new.delete_message(id, @config, @sqs_client)
         next
       end
 
       instance_id = AwsCleaner.new.process_message(body)
 
       if instance_id
-        chef_node = AwsCleaner::Chef.get_chef_node_name(instance_id, @config)
-        webhook(id, instance_id)
-        chef(id, instance_id, chef_node)
-        sensu(id, instance_id, chef_node)
+        #instance_name = AwsCleaner.new.getInstanceName(instance_id, @ec2_client)
+        sensu_name = instance_id
+        sensu(id, sensu_name)
       else
         @logger.info('Message not relevant, deleting')
-        AwsCleaner.new.delete_message(id, @config)
+        AwsCleaner.new.delete_message(id, @config, @sqs_client)
       end
     end
 
