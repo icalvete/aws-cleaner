@@ -43,23 +43,42 @@ class AwsCleaner
   module Sensu
     # check if the node exists in Sensu
     def self.in_sensu?(node_name, config)
-      RestClient::Request.execute(
-        url: "#{config[:sensu][:url]}/clients/#{node_name}",
+      response = RestClient::Request.execute(
+        url: "#{config[:sensu][:url]}/clients",
         method: :get,
         timeout: 5,
         open_timeout: 5
       )
+      clients = JSON.parse(response)
+      clients.each do |client|
+        if client['name'] =~ /^.*#{node_name}/
+          return true
+        end
+      end
+      return false
     rescue RestClient::ResourceNotFound
       return false
     rescue StandardError => e
       puts "Sensu request failed: #{e}"
       return false
-    else
-      return true
     end
 
     # call the Sensu API to remove the node
     def self.remove_from_sensu(node_name, config)
+      response = RestClient::Request.execute(
+        url: "#{config[:sensu][:url]}/clients",
+        method: :get,
+        timeout: 5,
+        open_timeout: 5
+      )
+      clients = JSON.parse(response)
+      clients.each do |client|
+        puts client['name']
+        if client['name'] =~ /^.*#{node_name}/
+          node_name = client['name']
+        end
+      end
+      puts "Eliminando #{node_name}"
       response = RestClient::Request.execute(
         url: "#{config[:sensu][:url]}/clients/#{node_name}",
         method: :delete,
