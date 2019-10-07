@@ -8,7 +8,7 @@ require 'timeout'
 require 'pp'
 
 # Main variables
-debug = false
+#debug = false
 
 # require our class
 require_relative '../lib/aws-cleaner.rb'
@@ -27,7 +27,7 @@ end
 @config = config(opts[:config])
 fake_instances = @config[:fake_instances]
 
-while true
+loop do
   fake_instances.each do |fake_instance|
     if AwsCleaner::Sensu.in_sensu?(fake_instance, @config)
       puts "#{fake_instance} is in sensu."

@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    ast (2.4.0)
     aws-sdk-core (2.11.212)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
@@ -20,6 +21,7 @@ GEM
     httparty (0.16.3)
       mime-types (~> 3.0)
       multi_xml (>= 0.5.2)
+    jaro_winkler (1.5.3)
     jmespath (1.4.0)
     logify (0.2.0)
     mime-types (3.2.2)
@@ -29,16 +31,29 @@ GEM
     multi_xml (0.6.0)
     multipart-post (2.0.0)
     netrc (0.11.0)
+    parallel (1.18.0)
+    parser (2.6.5.0)
+      ast (~> 2.4.0)
+    rainbow (3.0.0)
     rest-client (2.0.2)
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 4.0)
       netrc (~> 0.8)
+    rubocop (0.75.0)
+      jaro_winkler (~> 1.5.1)
+      parallel (~> 1.10)
+      parser (>= 2.6)
+      rainbow (>= 2.2.2, < 4.0)
+      ruby-progressbar (~> 1.7)
+      unicode-display_width (>= 1.4.0, < 1.7)
+    ruby-progressbar (1.10.1)
     slack-poster (2.2.1)
       faraday (~> 0.9)
     trollop (2.9.9)
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.5)
+    unicode-display_width (1.6.0)
 
 PLATFORMS
   ruby
@@ -48,6 +63,7 @@ DEPENDENCIES
   chef-api (~> 0.5)
   hipchat (~> 1.5)
   rest-client (~> 2)
+  rubocop
   slack-poster (~> 2.2)
   trollop (~> 2.1)
 
