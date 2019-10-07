@@ -12,4 +12,4 @@ rvm:
   - 2.5.0
 
 script:
-  - rubocop -l
+  - - bundle exec rubocop -l
