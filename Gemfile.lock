@@ -63,9 +63,9 @@ DEPENDENCIES
   chef-api (~> 0.5)
   hipchat (~> 1.5)
   rest-client (~> 2)
-  rubocop
+  rubocop (~> 0.75.0)
   slack-poster (~> 2.2)
   trollop (~> 2.1)
 
 BUNDLED WITH
-   1.16.5
+   2.0.2
