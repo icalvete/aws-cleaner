@@ -73,7 +73,7 @@ class AwsCleaner
         end
       end
       puts "Eliminando #{node_name}"
-      response = remove_sensu_client(node_name, config)
+      remove_sensu_client(node_name, config)
     end
 
     def self.get_sensu_clients(config)
