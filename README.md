@@ -50,10 +50,29 @@ Clean fake instance as soon as they apears in sensu.
 ./fake_instances_cleaner.rb &
 ```
 
-Clean isntances as soon as they are terminaced by EC2
+Clean instances as soon as they are terminaced by EC2
 
 ```bash
 ./aws_cleaner.rb &
+```
+
+aws_cleaner.rb remove all clients with name /i-.\*/
+
+You can use [user data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) to custom client name.
+
+```bash
+#!/bin/bash
+
+/bin/cat > "/etc/hostname" <<EOF
+myinstance
+EOF
+/bin/hostname -F /etc/hostname
+
+id=`/bin/readlink -f /var/lib/cloud/instance | /usr/bin/awk -F / {'print $6'}`
+ip=`hostname --all-ip-addresses | sed -e 's/[ \t\n]*$//'`
+sed -i.bak "s/address\": \".*\"/address\": \"${ip}\"/g" /etc/sensu/conf.d/client.json
+sed -i.bak "s/name\": \".*\"/name\": \"match-${id}\"/g" /etc/sensu/conf.d/client.json
+service sensu-client restart
 ```
 
 ### Logging

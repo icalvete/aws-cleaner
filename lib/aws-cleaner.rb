@@ -65,13 +65,7 @@ class AwsCleaner
 
     # call the Sensu API to remove the node
     def self.remove_from_sensu(node_name, config)
-      response = RestClient::Request.execute(
-        url: "#{config[:sensu][:url]}/clients",
-        method: :get,
-        timeout: 5,
-        open_timeout: 5
-      )
-      clients = JSON.parse(response)
+      clients = get_sensu_clients(config)
       clients.each do |client|
         puts client['name']
         if client['name'] =~ /^.*#{node_name}/
@@ -79,6 +73,20 @@ class AwsCleaner
         end
       end
       puts "Eliminando #{node_name}"
+      response = remove_sensu_client(node_name, config)
+    end
+
+    def self.get_sensu_clients(config)
+      response = RestClient::Request.execute(
+        url: "#{config[:sensu][:url]}/clients",
+        method: :get,
+        timeout: 5,
+        open_timeout: 5
+      )
+      JSON.parse(response)
+    end
+
+    def self.remove_sensu_client(node_name, config)
       response = RestClient::Request.execute(
         url: "#{config[:sensu][:url]}/clients/#{node_name}",
         method: :delete,

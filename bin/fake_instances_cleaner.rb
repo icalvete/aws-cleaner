@@ -36,5 +36,11 @@ loop do
     else
     end
   end
+  clients = AwsCleaner::Sensu.get_sensu_clients(@config)
+  clients.each do |client|
+    if client['name'] =~ /^i-.*/
+      AwsCleaner::Sensu.remove_sensu_client(client['name'], @config)
+    end
+  end
   sleep(2)
 end
